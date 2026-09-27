@@ -1,0 +1,35 @@
+{
+  "expo": {
+    "name": "Free Invoice Maker",
+    "slug": "free-invoice-maker",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "scheme": "freeinvoicemaker",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.yourcompany.freeinvoicemaker",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Not used yet — reserved for a future receipt-scanning feature.",
+        "com.apple.developer.proximity-reader.payment.acceptance": true
+      },
+      "entitlements": {
+        "com.apple.developer.proximity-reader.payment.acceptance": true
+      }
+    },
+    "android": {
+      "package": "com.yourcompany.freeinvoicemaker",
+      "permissions": ["NFC", "BLUETOOTH", "BLUETOOTH_ADMIN", "ACCESS_FINE_LOCATION"]
+    },
+    "plugins": [
+      "expo-dev-client",
+      "expo-secure-store",
+      [
+        "@stripe/stripe-react-native",
+        {
+          "merchantIdentifier": "merchant.com.yourcompany.freeinvoicemaker",
+          "enableGooglePay": true
+        }
+      ]
+    ]
+  }
+}
