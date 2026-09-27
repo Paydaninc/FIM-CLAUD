@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Free Invoice Maker",
-    "slug": "free-invoice-maker",
+    "slug": "fim",
     "version": "0.1.0",
     "orientation": "portrait",
     "scheme": "freeinvoicemaker",
