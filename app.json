@@ -41,6 +41,9 @@
         "projectId": "05c34637-a597-48fb-b1d3-90b2e7375fdd"
       }
     },
-    "owner": "paydaninc"
+    "owner": "paydaninc",
+    "splash": {
+      "backgroundColor": "#FAFAF8"
+    }
   }
 }
