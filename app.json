@@ -9,7 +9,7 @@
       "supportsTablet": false,
       "bundleIdentifier": "com.yourcompany.freeinvoicemaker",
       "infoPlist": {
-        "NSCameraUsageDescription": "Not used yet — reserved for a future receipt-scanning feature.",
+        "NSCameraUsageDescription": "Not used yet \u2014 reserved for a future receipt-scanning feature.",
         "com.apple.developer.proximity-reader.payment.acceptance": true
       },
       "entitlements": {
@@ -18,7 +18,12 @@
     },
     "android": {
       "package": "com.yourcompany.freeinvoicemaker",
-      "permissions": ["NFC", "BLUETOOTH", "BLUETOOTH_ADMIN", "ACCESS_FINE_LOCATION"]
+      "permissions": [
+        "NFC",
+        "BLUETOOTH",
+        "BLUETOOTH_ADMIN",
+        "ACCESS_FINE_LOCATION"
+      ]
     },
     "plugins": [
       "expo-dev-client",
@@ -30,6 +35,12 @@
           "enableGooglePay": true
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "05c34637-a597-48fb-b1d3-90b2e7375fdd"
+      }
+    },
+    "owner": "paydaninc"
   }
 }
