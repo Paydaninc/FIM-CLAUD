@@ -1,4 +1,4 @@
-import { apiRequest, setToken, BASE_URL } from './client';
+import { apiRequest, setToken, getBaseUrl } from './client';
 
 // ── Types (mirroring the backend's response shapes) ──────────────────────
 export interface User {
@@ -213,8 +213,6 @@ export async function refundInvoice(invoiceId: string, amount?: number) {
   );
 }
 
-export function getInvoicePdfUrl(invoiceId: string) {
-  // Used directly as a URI (e.g. by expo-print/share or a WebView) rather
-  // than through apiRequest, since it's a binary PDF stream, not JSON.
-  return `${BASE_URL}/invoices/${invoiceId}/pdf`;
+export async function getInvoicePdfUrl(invoiceId: string) {
+  return `${await getBaseUrl()}/invoices/${invoiceId}/pdf`;
 }
