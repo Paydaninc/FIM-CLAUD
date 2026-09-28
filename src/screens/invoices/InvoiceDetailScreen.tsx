@@ -1,11 +1,11 @@
 import React, { useCallback, useState } from 'react';
-import { View, Text, ScrollView, Alert, StyleSheet } from 'react-native';
+import { View, Text, Image, ScrollView, Alert, Share, StyleSheet } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import * as Clipboard from 'expo-clipboard';
 import { initStripe, initPaymentSheet, presentPaymentSheet } from '@stripe/stripe-react-native';
 import {
   getInvoice, Invoice, sendInvoice, voidInvoice, payCash, createCardPaymentIntent,
-  createPaymentLink, createAchPaymentIntent, refundInvoice,
+  createPaymentLink, createAchPaymentIntent, refundInvoice, getInvoicePdfUrl,
 } from '@/api/endpoints';
 import { isDemoMode } from '@/api/client';
 import { useAuth } from '@/context/AuthContext';
@@ -63,6 +63,31 @@ export default function InvoiceDetailScreen({ route, navigation }: any) {
   const doLink = () => act('link', async () => { setLink((await createPaymentLink(id)).checkoutUrl); });
   const copyLink = async () => { if (link) { await Clipboard.setStringAsync(link); Alert.alert('Copied', 'Payment link copied. Paste it into a text or email to your customer.'); } };
 
+  /** Any card/bank/link/Tap to Pay action gets routed through here. Cash never does — it's the only
+   *  method that works before Stripe is connected. */
+  const requireStripe = (action: () => void) => {
+    if (!stripeStatus?.readyForPayments) {
+      Alert.alert(
+        'Stripe setup needed',
+        'Connect Stripe to accept card, bank, payment-link, or Tap to Pay payments. Cash works without it.',
+        [
+          { text: 'Not now', style: 'cancel' },
+          { text: 'Set up now', onPress: () => navigation.navigate('StripeConnect') },
+        ]
+      );
+      return;
+    }
+    action();
+  };
+
+  const doShareInvoice = () => act('share', async () => {
+    const url = await getInvoicePdfUrl(id);
+    await Share.share({
+      message: `Invoice #${invoice?.invoice_number} from ${business?.business_name || 'us'} — ${url}`,
+      url,
+    });
+  });
+
   const doCard = () => act('card', async () => {
     if (isDemoMode()) { await payCash(id); await load(); Alert.alert('Demo mode', "In the live app, Stripe's secure card sheet opens here. Marked as paid for the demo."); return; }
     const { clientSecret, publishableKey, connectedAccountId } = await createCardPaymentIntent(id);
@@ -108,10 +133,10 @@ export default function InvoiceDetailScreen({ route, navigation }: any) {
   }
 
   const payable = ['sent', 'viewed', 'overdue'].includes(invoice.status);
-  const ready = !!stripeStatus?.readyForPayments;
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ padding: spacing.md }}>
+      {business?.logo_url && <Image source={{ uri: business.logo_url }} style={styles.logo} resizeMode="contain" />}
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.xs }}>
         <Text style={styles.title}>Invoice #{invoice.invoice_number}</Text>
         <StatusBadge status={invoice.status} />
@@ -145,30 +170,29 @@ export default function InvoiceDetailScreen({ route, navigation }: any) {
       {payable && (
         <>
           <SectionTitle>Collect payment</SectionTitle>
-          <Text style={styles.note}>Full payment only — partial payments aren't supported.</Text>
+          <Text style={styles.note}>Full payment only — partial payments aren't supported. Only cash works until Stripe is connected.</Text>
           <Button title="Mark as paid (cash)" variant="secondary" onPress={doCash} loading={busy === 'cash'} />
-          {ready ? (
-            <>
-              <Button title="Pay by card" onPress={doCard} loading={busy === 'card'} />
-              <Button title="Pay by bank (ACH)" variant="secondary" onPress={doAch} loading={busy === 'ach'} />
-              <Button title={link ? 'Regenerate payment link' : 'Get payment link'} variant="secondary" onPress={doLink} loading={busy === 'link'} />
-              {link && (
-                <Card>
-                  <Text selectable style={{ color: colors.text, fontSize: 12, marginBottom: spacing.sm }}>{link}</Text>
-                  <Button title="Copy link" onPress={copyLink} />
-                  <Text style={styles.note}>Paste it into your own text or email — the app doesn't send it for you. The invoice flips to Paid automatically once your customer pays.</Text>
-                </Card>
-              )}
-              <Button title="Tap to Pay (coming soon)" variant="secondary" disabled onPress={() => {}} />
-            </>
-          ) : (
-            <Banner tone="warning" text="Finish connecting Stripe (Settings) to accept card, bank, and link payments." />
+          <Button title="Pay by card" onPress={() => requireStripe(doCard)} loading={busy === 'card'} />
+          <Button title="Pay by bank (ACH)" variant="secondary" onPress={() => requireStripe(doAch)} loading={busy === 'ach'} />
+          <Button title={link ? 'Regenerate payment link' : 'Get payment link'} variant="secondary" onPress={() => requireStripe(doLink)} loading={busy === 'link'} />
+          {link && (
+            <Card>
+              <Text selectable style={{ color: colors.text, fontSize: 12, marginBottom: spacing.sm }}>{link}</Text>
+              <Button title="Copy link" onPress={copyLink} />
+              <Text style={styles.note}>Paste it into your own text or email — the app doesn't send it for you. The invoice flips to Paid automatically once your customer pays.</Text>
+            </Card>
           )}
+          <Button title="Tap to Pay" variant="secondary" onPress={() => requireStripe(() => Alert.alert('Coming soon', 'Tap to Pay needs a physical device to test.'))} />
           <Button title="Void invoice" variant="secondary" onPress={doVoid} loading={busy === 'void'} />
         </>
       )}
 
-      {invoice.status === 'paid' && <Button title="Refund" variant="danger" onPress={doRefund} loading={busy === 'refund'} />}
+      {invoice.status === 'paid' && (
+        <>
+          <Button title="Share invoice" variant="secondary" onPress={doShareInvoice} loading={busy === 'share'} />
+          <Button title="Refund" variant="danger" onPress={doRefund} loading={busy === 'refund'} />
+        </>
+      )}
     </ScrollView>
   );
 }
@@ -178,4 +202,5 @@ const styles = StyleSheet.create({
   title: { ...typography.h1, color: colors.text },
   sub: { ...typography.body, color: colors.textSecondary, marginBottom: spacing.md },
   note: { ...typography.caption, color: colors.textSecondary, marginBottom: spacing.sm },
+  logo: { width: 120, height: 48, marginBottom: spacing.sm },
 });

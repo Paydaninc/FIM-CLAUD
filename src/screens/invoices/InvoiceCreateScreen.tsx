@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import { listClients, createInvoice, Client } from '@/api/endpoints';
+import { listClients, createInvoice, sendInvoice, Client } from '@/api/endpoints';
 import { useAuth } from '@/context/AuthContext';
 import { FormInput, Button, ErrorText } from '@/components/Form';
 import { Card, Chip, SectionTitle, Row, money, errorMessage } from '@/components/ui';
@@ -49,6 +49,8 @@ export default function InvoiceCreateScreen({ navigation }: any) {
         discount_value: discountType ? dv : undefined,
         line_items: lines.map((l) => ({ description: l.description.trim(), quantity: Number(l.quantity), unit_price: Number(l.unit_price) })),
       });
+      // Skip the intermediate "draft" step — go straight to a sent invoice with payment options showing.
+      try { await sendInvoice(invoice.id); } catch { /* still navigate; they can send manually from there */ }
       navigation.replace('InvoiceDetail', { id: invoice.id });
     } catch (e) { setError(errorMessage(e)); }
     finally { setSaving(false); }
@@ -95,7 +97,7 @@ export default function InvoiceCreateScreen({ navigation }: any) {
       </Card>
 
       <ErrorText message={error} />
-      <Button title="Save draft" onPress={save} loading={saving} />
+      <Button title="Next" onPress={save} loading={saving} />
     </ScrollView>
   );
 }
