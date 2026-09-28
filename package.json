@@ -23,7 +23,8 @@
     "@react-navigation/native-stack": "^6.11.0",
     "@react-navigation/bottom-tabs": "^6.6.1",
     "@stripe/stripe-react-native": "^0.38.6",
-    "expo-clipboard": "~6.0.3"
+    "expo-clipboard": "~6.0.3",
+    "expo-image-picker": "~15.0.7"
   },
   "devDependencies": {
     "@babel/core": "^7.25.0",

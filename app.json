@@ -34,6 +34,12 @@
           "merchantIdentifier": "merchant.com.yourcompany.freeinvoicemaker",
           "enableGooglePay": true
         }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow Free Invoice Maker to access your photos to add a business logo."
+        }
       ]
     ],
     "extra": {
