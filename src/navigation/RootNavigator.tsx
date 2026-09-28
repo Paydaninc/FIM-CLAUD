@@ -8,24 +8,12 @@ import { colors } from '@/theme';
 import LoginScreen from '@/screens/auth/LoginScreen';
 import SignupScreen from '@/screens/auth/SignupScreen';
 import BusinessProfileScreen from '@/screens/onboarding/BusinessProfileScreen';
-import StripeConnectPlaceholder from '@/screens/onboarding/StripeConnectPlaceholder';
-import MainPlaceholder from '@/screens/MainPlaceholder';
+import StripeConnectScreen from '@/screens/onboarding/StripeConnectScreen';
+import MainStack from '@/navigation/MainTabs';
 
 const Stack = createNativeStackNavigator();
 
-const linking = {
-  prefixes: ['freeinvoicemaker://'],
-  config: {
-    screens: {
-      // The backend's Stripe onboarding return/callback endpoints redirect
-      // to these — see stripeConnect.controller.js's `deepLink()` helper.
-      // Handled in the next phase's actual StripeConnectScreen; the routes
-      // are registered here now so linking works as soon as that lands.
-      StripeConnectReturn: 'stripe-connect-return',
-      StripeConnectError: 'stripe-connect-error',
-    },
-  },
-};
+const linking = { prefixes: ['freeinvoicemaker://'] };
 
 /**
  * The entire "which screen should be showing" decision is a pure function
@@ -61,14 +49,12 @@ export default function RootNavigator() {
   } else if (!stripeStatus?.readyForPayments) {
     content = (
       <Stack.Navigator screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="StripeConnect" component={StripeConnectPlaceholder} />
+        <Stack.Screen name="StripeConnect" component={StripeConnectScreen} />
       </Stack.Navigator>
     );
   } else {
     content = (
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="Main" component={MainPlaceholder} />
-      </Stack.Navigator>
+      <MainStack />
     );
   }
 
