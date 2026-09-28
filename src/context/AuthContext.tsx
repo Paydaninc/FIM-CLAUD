@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import * as SecureStore from 'expo-secure-store';
 import { getToken, setToken, setDemoMode } from '@/api/client';
 import {
   getMe, getMyBusiness, getStripeStatus,
@@ -16,6 +17,10 @@ interface AuthState {
   logout: () => Promise<void>;
   enterDemo: () => Promise<void>;
   refresh: () => Promise<void>;
+  /** True once the user has chosen "Skip for now" on Stripe onboarding. Card, bank, link and Tap to Pay stay
+   *  gated behind a "finish setup" prompt until Stripe is actually connected; only cash works either way. */
+  stripeSkipped: boolean;
+  skipStripeSetup: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthState | null>(null);
@@ -25,6 +30,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [business, setBusiness] = useState<Business | null>(null);
   const [stripeStatus, setStripeStatus] = useState<StripeStatus | null>(null);
+  const [stripeSkipped, setStripeSkipped] = useState(false);
 
   /**
    * Re-fetches user/business/Stripe status. Called on app start (if a
@@ -50,6 +56,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } catch {
         setStripeStatus(null);
       }
+
+      const skipped = await SecureStore.getItemAsync('fim_stripe_skip');
+      setStripeSkipped(skipped === 'true');
     } catch {
       // Token invalid/expired — treat as logged out.
       await setToken(null);
@@ -82,16 +91,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await refresh();
   };
 
+  const skipStripeSetup = async () => {
+    await SecureStore.setItemAsync('fim_stripe_skip', 'true');
+    setStripeSkipped(true);
+  };
+
   const logout = async () => {
     setDemoMode(false);
+    await SecureStore.deleteItemAsync('fim_stripe_skip').catch(() => {});
     await apiLogout();
     setUser(null);
     setBusiness(null);
     setStripeStatus(null);
+    setStripeSkipped(false);
   };
 
   return (
-    <AuthContext.Provider value={{ loading, user, business, stripeStatus, login, signup, logout, enterDemo, refresh }}>
+    <AuthContext.Provider value={{ loading, user, business, stripeStatus, login, signup, logout, enterDemo, refresh, stripeSkipped, skipStripeSetup }}>
       {children}
     </AuthContext.Provider>
   );
