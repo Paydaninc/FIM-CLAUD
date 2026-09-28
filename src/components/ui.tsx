@@ -87,7 +87,7 @@ export function InvoiceRow({ inv, onPress }: { inv: any; onPress: () => void }) 
       <View style={{ flex: 1 }}>
         <Text style={{ fontSize: 15, fontWeight: '600', color: colors.text }}>{inv.client_name || 'No client'}</Text>
         <Text style={{ fontSize: 12, color: colors.textSecondary, marginTop: 2 }}>
-          Inv #{inv.invoice_number} · Due {shortDate(inv.due_date)}
+          Inv #{inv.invoice_number}{inv.due_date ? ` · Due ${shortDate(inv.due_date)}` : ''}
         </Text>
       </View>
       <View style={{ alignItems: 'flex-end' }}>
