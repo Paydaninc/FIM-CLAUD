@@ -22,7 +22,7 @@ const linking = { prefixes: ['freeinvoicemaker://'] };
  * one automatically. Mirrors your spec's exact onboarding order.
  */
 export default function RootNavigator() {
-  const { loading, user, business, stripeStatus } = useAuth();
+  const { loading, user, business, stripeStatus, stripeSkipped } = useAuth();
 
   if (loading) {
     return (
@@ -46,7 +46,7 @@ export default function RootNavigator() {
         <Stack.Screen name="BusinessProfile" component={BusinessProfileScreen} />
       </Stack.Navigator>
     );
-  } else if (!stripeStatus?.readyForPayments) {
+  } else if (!stripeStatus?.readyForPayments && !stripeSkipped) {
     content = (
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         <Stack.Screen name="StripeConnect" component={StripeConnectScreen} />

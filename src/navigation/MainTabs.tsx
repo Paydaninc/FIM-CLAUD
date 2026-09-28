@@ -10,6 +10,8 @@ import InvoiceCreateScreen from '@/screens/invoices/InvoiceCreateScreen';
 import ClientListScreen from '@/screens/clients/ClientListScreen';
 import ClientCreateScreen from '@/screens/clients/ClientCreateScreen';
 import SettingsScreen from '@/screens/settings/SettingsScreen';
+import BusinessEditScreen from '@/screens/settings/BusinessEditScreen';
+import StripeConnectScreen from '@/screens/onboarding/StripeConnectScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -41,6 +43,8 @@ export default function MainStack() {
       <Stack.Screen name="InvoiceDetail" component={InvoiceDetailScreen} options={{ title: 'Invoice' }} />
       <Stack.Screen name="InvoiceCreate" component={InvoiceCreateScreen} options={{ title: 'New invoice' }} />
       <Stack.Screen name="ClientCreate" component={ClientCreateScreen} options={{ title: 'New client' }} />
+      <Stack.Screen name="BusinessEdit" component={BusinessEditScreen} options={{ title: 'Business info' }} />
+      <Stack.Screen name="StripeConnect" component={StripeConnectScreen} options={{ title: 'Connect Stripe' }} />
     </Stack.Navigator>
   );
 }
