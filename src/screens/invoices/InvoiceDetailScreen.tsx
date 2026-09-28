@@ -116,7 +116,7 @@ export default function InvoiceDetailScreen({ route, navigation }: any) {
         <Text style={styles.title}>Invoice #{invoice.invoice_number}</Text>
         <StatusBadge status={invoice.status} />
       </View>
-      <Text style={styles.sub}>{invoice.client_name || 'No client'} · Due {shortDate(invoice.due_date)}</Text>
+      <Text style={styles.sub}>{invoice.client_name || 'No client'}{invoice.due_date ? ` · Due ${shortDate(invoice.due_date)}` : ''}</Text>
 
       {invoice.last_payment_failure_reason && <Banner tone="danger" text={`Last payment failed: ${invoice.last_payment_failure_reason}`} />}
       {invoice.disputed && <Banner tone="danger" text={`Disputed: ${invoice.dispute_reason || 'A customer opened a dispute.'}`} />}

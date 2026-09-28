@@ -17,7 +17,6 @@ export default function InvoiceCreateScreen({ navigation }: any) {
   const [items, setItems] = useState<Item[]>([blank()]);
   const [discountType, setDiscountType] = useState<'percent' | 'fixed' | undefined>();
   const [discountValue, setDiscountValue] = useState('');
-  const [dueDate, setDueDate] = useState('');
   const [notes, setNotes] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -41,12 +40,10 @@ export default function InvoiceCreateScreen({ navigation }: any) {
     if (lines.some((l) => !l.description.trim() || !(Number(l.quantity) > 0) || !(Number(l.unit_price) >= 0) || l.unit_price === '')) {
       setError('Each line needs a description, a quantity above 0, and a price.'); return;
     }
-    if (dueDate && !/^\d{4}-\d{2}-\d{2}$/.test(dueDate)) { setError('Due date must look like 2026-10-31.'); return; }
     setSaving(true);
     try {
       const { invoice } = await createInvoice({
         client_id: clientId,
-        due_date: dueDate || undefined,
         notes: notes || undefined,
         discount_type: discountType,
         discount_value: discountType ? dv : undefined,
@@ -88,7 +85,6 @@ export default function InvoiceCreateScreen({ navigation }: any) {
       </View>
       {discountType && <FormInput label={discountType === 'percent' ? 'Discount (%)' : 'Discount ($)'} value={discountValue} onChangeText={setDiscountValue} keyboardType="decimal-pad" />}
 
-      <FormInput label="Due date (YYYY-MM-DD)" value={dueDate} onChangeText={setDueDate} placeholder="2026-10-31" keyboardType="numbers-and-punctuation" />
       <FormInput label="Notes / terms" value={notes} onChangeText={setNotes} autoCapitalize="sentences" multiline placeholder="Thank you for your business!" />
 
       <Card>
