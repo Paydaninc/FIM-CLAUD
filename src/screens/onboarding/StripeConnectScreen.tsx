@@ -10,8 +10,11 @@ import { colors, spacing, typography } from '@/theme';
 const RETURN_URL = 'freeinvoicemaker://stripe-connect-return';
 
 /** Onboarding step 3: connect Stripe — new account (Express) or existing account (Standard OAuth). */
-export default function StripeConnectScreen() {
-  const { business, stripeStatus, refresh, logout } = useAuth();
+export default function StripeConnectScreen({ navigation }: any) {
+  const { business, stripeStatus, refresh, logout, skipStripeSetup } = useAuth();
+  // Reached two ways: as the forced onboarding step (no back stack — offers Skip/Log out) or
+  // pushed later from Settings or a payment-method prompt (has a back stack — just a back arrow).
+  const embedded = navigation?.canGoBack?.() ?? false;
   const [busy, setBusy] = useState<'express' | 'standard' | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -37,6 +40,7 @@ export default function StripeConnectScreen() {
       <Text style={styles.title}>Connect Stripe</Text>
       <Text style={styles.body}>
         {business?.business_name} needs a Stripe account to accept card and bank payments. Payouts go straight to your bank.
+        {!embedded && ' You can skip this for now — cash still works, and you\'ll be asked again the first time you try card, bank, link, or Tap to Pay.'}
       </Text>
 
       {started && (
@@ -57,7 +61,19 @@ export default function StripeConnectScreen() {
 
       <ErrorText message={error} />
       <Button title="Check status again" variant="secondary" onPress={refresh} disabled={busy !== null} />
-      <Button title="Log out" variant="secondary" onPress={logout} />
+      {embedded ? (
+        <Button title="Done for now" variant="secondary" onPress={() => navigation.goBack()} disabled={busy !== null} />
+      ) : (
+        <>
+          <Button
+            title="Skip for now"
+            variant="secondary"
+            onPress={skipStripeSetup}
+            disabled={busy !== null}
+          />
+          <Button title="Log out" variant="secondary" onPress={logout} />
+        </>
+      )}
     </View>
   );
 }
