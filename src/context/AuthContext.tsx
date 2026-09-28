@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
-import { getToken, setToken } from '@/api/client';
+import { getToken, setToken, setDemoMode } from '@/api/client';
 import {
   getMe, getMyBusiness, getStripeStatus,
   User, Business, StripeStatus,
@@ -14,6 +14,7 @@ interface AuthState {
   login: (email: string, password: string) => Promise<void>;
   signup: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  enterDemo: () => Promise<void>;
   refresh: () => Promise<void>;
 }
 
@@ -76,7 +77,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await refresh();
   };
 
+  const enterDemo = async () => {
+    setDemoMode(true);
+    await refresh();
+  };
+
   const logout = async () => {
+    setDemoMode(false);
     await apiLogout();
     setUser(null);
     setBusiness(null);
@@ -84,7 +91,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ loading, user, business, stripeStatus, login, signup, logout, refresh }}>
+    <AuthContext.Provider value={{ loading, user, business, stripeStatus, login, signup, logout, enterDemo, refresh }}>
       {children}
     </AuthContext.Provider>
   );
