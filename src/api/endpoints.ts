@@ -120,6 +120,10 @@ export async function createBusiness(data: Partial<Business>) {
 }
 
 // ── Stripe Connect ───────────────────────────────────────────────────────
+export async function updateBusinessProfile(data: Partial<Business>) {
+  return apiRequest<{ business: Business }>('/business/me', { method: 'PATCH', body: data });
+}
+
 export async function getStripeStatus() {
   return apiRequest<StripeStatus>('/stripe/connect/status');
 }

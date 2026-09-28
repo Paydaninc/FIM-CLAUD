@@ -64,7 +64,10 @@ export async function demoRequest(path: string, method: string, body: Json): Pro
   const fail = (m: string) => { throw new Error(m); };
 
   if (p === '/auth/me') return { user: { id: 'demo', email: 'demo@example.com', emailVerified: true } };
-  if (p === '/business/me') return { business };
+  if (p === '/business/me') {
+    if (method === 'PATCH') Object.assign(business, body);
+    return { business };
+  }
   if (p === '/stripe/connect/status') {
     return { connected: true, onboardingType: 'express', chargesEnabled: true, payoutsEnabled: true, detailsSubmitted: true, readyForPayments: true };
   }
