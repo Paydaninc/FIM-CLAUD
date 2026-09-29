@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, KeyboardAvoidingView, Platform, TouchableOpacity, StyleSheet } from 'react-native';
+import { Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import { useAuth } from '@/context/AuthContext';
 import { FormInput, Button, ErrorText } from '@/components/Form';
 import { colors, spacing, typography } from '@/theme';
 import { ApiError } from '@/api/client';
 
 export default function SignupScreen({ navigation }: any) {
-  const { signup } = useAuth();
+  const { signup, enterDemo } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -28,17 +28,20 @@ export default function SignupScreen({ navigation }: any) {
       // RootNavigator will move to onboarding automatically once `business`
       // comes back null from the post-signup refresh.
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Something went wrong. Try again.');
+      // A network failure (no backend reachable) throws a plain Error, not an ApiError —
+      // that's the most common cause here, so say so plainly instead of a bare "went wrong".
+      setError(
+        err instanceof ApiError
+          ? err.message
+          : "Can't reach the server. If no backend is set up yet, try demo mode below instead."
+      );
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
+    <ScrollView style={styles.container} contentContainerStyle={{ padding: spacing.lg, flexGrow: 1, justifyContent: 'center' }} keyboardShouldPersistTaps="handled">
       <Text style={styles.title}>Create your account</Text>
       <Text style={styles.subtitle}>Start invoicing in a couple of minutes</Text>
 
@@ -59,16 +62,17 @@ export default function SignupScreen({ navigation }: any) {
 
       <ErrorText message={error} />
       <Button title="Sign up" onPress={handleSubmit} loading={loading} />
+      <Button title="Explore the app in demo mode" variant="secondary" onPress={enterDemo} />
 
       <TouchableOpacity onPress={() => navigation.navigate('Login')} style={{ marginTop: spacing.md }}>
         <Text style={styles.link}>Already have an account? Log in</Text>
       </TouchableOpacity>
-    </KeyboardAvoidingView>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background, padding: spacing.lg, justifyContent: 'center' },
+  container: { flex: 1, backgroundColor: colors.background },
   title: { ...typography.h1, color: colors.text, textAlign: 'center', marginBottom: spacing.xs },
   subtitle: { ...typography.body, color: colors.textSecondary, textAlign: 'center', marginBottom: spacing.xl },
   link: { color: colors.accent, textAlign: 'center', fontSize: 14 },
