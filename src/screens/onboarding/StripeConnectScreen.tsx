@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
 import { useAuth } from '@/context/AuthContext';
 import { startExpressOnboarding, startStandardOnboarding } from '@/api/endpoints';
@@ -36,7 +36,7 @@ export default function StripeConnectScreen({ navigation }: any) {
   const started = stripeStatus?.connected && !stripeStatus.readyForPayments;
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <Text style={styles.title}>Connect Stripe</Text>
       <Text style={styles.body}>
         {business?.business_name} needs a Stripe account to accept card and bank payments. Payouts go straight to your bank.
@@ -74,12 +74,13 @@ export default function StripeConnectScreen({ navigation }: any) {
           <Button title="Log out" variant="secondary" onPress={logout} />
         </>
       )}
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background, padding: spacing.lg, justifyContent: 'center' },
+  container: { flex: 1, backgroundColor: colors.background },
+  content: { padding: spacing.lg, flexGrow: 1, justifyContent: 'center' },
   title: { ...typography.h1, color: colors.text, marginBottom: spacing.sm },
   body: { ...typography.body, color: colors.textSecondary, marginBottom: spacing.lg },
   cardTitle: { ...typography.h2, color: colors.text, marginBottom: 4 },

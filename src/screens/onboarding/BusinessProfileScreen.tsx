@@ -48,14 +48,14 @@ export default function BusinessProfileScreen() {
       });
       await refresh(); // RootNavigator moves to the Stripe Connect step automatically
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Something went wrong. Try again.');
+      setError(err instanceof ApiError ? err.message : "Can't reach the server. Check your connection or server settings and try again.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={{ padding: spacing.lg }}>
+    <ScrollView style={styles.container} contentContainerStyle={{ padding: spacing.lg }} keyboardShouldPersistTaps="handled">
       <Text style={styles.title}>Tell us about your business</Text>
       <Text style={styles.subtitle}>This appears on every invoice you send.</Text>
 
