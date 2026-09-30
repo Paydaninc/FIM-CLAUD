@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import { useAuth } from '@/context/AuthContext';
 import { FormInput, Button, ErrorText } from '@/components/Form';
+import ServerSettings from '@/components/ServerSettings';
 import { colors, spacing, typography } from '@/theme';
 import { ApiError } from '@/api/client';
 
@@ -11,6 +12,7 @@ export default function SignupScreen({ navigation }: any) {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showServer, setShowServer] = useState(false);
 
   const handleSubmit = async () => {
     setError(null);
@@ -33,7 +35,7 @@ export default function SignupScreen({ navigation }: any) {
       setError(
         err instanceof ApiError
           ? err.message
-          : "Can't reach the server. If no backend is set up yet, try demo mode below instead."
+          : "Can't reach the server. Check Server settings below, or try demo mode instead."
       );
     } finally {
       setLoading(false);
@@ -67,6 +69,10 @@ export default function SignupScreen({ navigation }: any) {
       <TouchableOpacity onPress={() => navigation.navigate('Login')} style={{ marginTop: spacing.md }}>
         <Text style={styles.link}>Already have an account? Log in</Text>
       </TouchableOpacity>
+      <TouchableOpacity onPress={() => setShowServer(!showServer)} style={{ marginTop: spacing.lg }}>
+        <Text style={[styles.link, { color: colors.textSecondary }]}>{showServer ? 'Hide server settings' : 'Server settings'}</Text>
+      </TouchableOpacity>
+      {showServer && <ServerSettings />}
     </ScrollView>
   );
 }
