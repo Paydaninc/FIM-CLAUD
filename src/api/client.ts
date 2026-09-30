@@ -3,7 +3,10 @@ import { demoRequest } from './demo';
 
 const TOKEN_KEY = 'fim_access_token';
 const URL_KEY = 'fim_api_url';
-const DEFAULT_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:4000';
+// Ships pointed at the real hosted backend so the app works out of the box with
+// no manual setup. Server Settings (Login/Signup/Settings) can still override this
+// at runtime, e.g. for local development against a machine on the same network.
+const DEFAULT_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'https://fim-api-rtze.onrender.com';
 
 let demoMode = false;
 export const isDemoMode = () => demoMode;
