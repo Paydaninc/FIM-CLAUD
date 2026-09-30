@@ -11,6 +11,7 @@ const clientsRoutes = require('./routes/clients.routes');
 const invoicesRoutes = require('./routes/invoices.routes');
 const dashboardRoutes = require('./routes/dashboard.routes');
 const terminalRoutes = require('./routes/terminal.routes');
+const adminRoutes = require('./routes/admin.routes');
 const stripeWebhook = require('./webhooks/stripe.webhook');
 const { errorHandler } = require('./middleware/errorHandler');
 
@@ -51,6 +52,7 @@ app.use('/clients', clientsRoutes);
 app.use('/invoices', invoicesRoutes);
 app.use('/dashboard', dashboardRoutes);
 app.use('/stripe/terminal', terminalRoutes);
+app.use('/admin', adminRoutes);
 
 app.use((req, res) => res.status(404).json({ error: 'Not found.' }));
 app.use(errorHandler);
