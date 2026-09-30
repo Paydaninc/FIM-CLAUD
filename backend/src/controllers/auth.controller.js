@@ -50,7 +50,7 @@ async function login(req, res) {
   const { email, password } = req.body;
 
   const { rows } = await query(
-    'SELECT id, email, password_hash, email_verified FROM users WHERE email = $1',
+    'SELECT id, email, password_hash, email_verified, is_active FROM users WHERE email = $1',
     [email.toLowerCase()]
   );
   const user = rows[0];
@@ -58,6 +58,9 @@ async function login(req, res) {
   // Same error for "no such user" and "wrong password" — don't leak which one.
   if (!user || !(await verifyPassword(password, user.password_hash))) {
     return res.status(401).json({ error: 'Invalid email or password.' });
+  }
+  if (user.is_active === false) {
+    return res.status(403).json({ error: 'This account has been deactivated.' });
   }
 
   const accessToken = signAccessToken(user.id);
