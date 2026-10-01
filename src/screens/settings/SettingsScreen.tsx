@@ -2,14 +2,24 @@ import React, { useState } from 'react';
 import { View, Text, Image, ScrollView, StyleSheet } from 'react-native';
 import { useAuth } from '@/context/AuthContext';
 import { isDemoMode } from '@/api/client';
-import { Button } from '@/components/Form';
+import { bootstrapAdmin } from '@/api/endpoints';
+import { Button, ErrorText } from '@/components/Form';
 import ServerSettings from '@/components/ServerSettings';
-import { Card, Banner, Row, SectionTitle } from '@/components/ui';
+import { Card, Banner, Row, SectionTitle, errorMessage } from '@/components/ui';
 import { colors, spacing } from '@/theme';
 
 export default function SettingsScreen({ navigation }: any) {
   const { user, business, stripeStatus, refresh, logout } = useAuth();
   const [checking, setChecking] = useState(false);
+  const [claimingAdmin, setClaimingAdmin] = useState(false);
+  const [adminError, setAdminError] = useState<string | null>(null);
+
+  const claimAdmin = async () => {
+    setClaimingAdmin(true); setAdminError(null);
+    try { await bootstrapAdmin(); await refresh(); }
+    catch (e) { setAdminError(errorMessage(e)); }
+    finally { setClaimingAdmin(false); }
+  };
   const stripeReady = !!stripeStatus?.readyForPayments;
 
   return (
@@ -50,6 +60,31 @@ export default function SettingsScreen({ navigation }: any) {
 
       <SectionTitle>Account</SectionTitle>
       <Card><Text style={{ color: colors.text }}>{user?.email}</Text></Card>
+
+      {!isDemoMode() && user?.is_admin && (
+        <>
+          <SectionTitle>Admin</SectionTitle>
+          <Card>
+            <Text style={{ color: colors.textSecondary, fontSize: 12, marginBottom: spacing.sm }}>
+              View every account, edit a business for support, or deactivate access.
+            </Text>
+            <Button title="Admin accounts" onPress={() => navigation.navigate('AdminAccounts')} />
+          </Card>
+        </>
+      )}
+
+      {!isDemoMode() && !user?.is_admin && (
+        <>
+          <SectionTitle>Admin</SectionTitle>
+          <Card>
+            <Text style={{ color: colors.textSecondary, fontSize: 12, marginBottom: spacing.sm }}>
+              If no admin exists yet, you can claim the owner role here. This only works once.
+            </Text>
+            <ErrorText message={adminError} />
+            <Button title="Become admin" variant="secondary" onPress={claimAdmin} loading={claimingAdmin} />
+          </Card>
+        </>
+      )}
 
       {!isDemoMode() && (
         <>
