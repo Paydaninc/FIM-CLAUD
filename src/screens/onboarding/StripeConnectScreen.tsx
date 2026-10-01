@@ -59,18 +59,14 @@ export default function StripeConnectScreen({ navigation }: any) {
         <Button title="Connect my existing account" variant="secondary" onPress={() => run('standard')} loading={busy === 'standard'} disabled={busy !== null} />
       </Card>
 
+      {busy && <Text style={styles.waking}>This can take up to a minute if the server was asleep — hang tight.</Text>}
       <ErrorText message={error} />
       <Button title="Check status again" variant="secondary" onPress={refresh} disabled={busy !== null} />
       {embedded ? (
-        <Button title="Done for now" variant="secondary" onPress={() => navigation.goBack()} disabled={busy !== null} />
+        <Button title="Done for now" variant="secondary" onPress={() => navigation.goBack()} />
       ) : (
         <>
-          <Button
-            title="Skip for now"
-            variant="secondary"
-            onPress={skipStripeSetup}
-            disabled={busy !== null}
-          />
+          <Button title="Skip for now" variant="secondary" onPress={skipStripeSetup} />
           <Button title="Log out" variant="secondary" onPress={logout} />
         </>
       )}
@@ -85,4 +81,5 @@ const styles = StyleSheet.create({
   body: { ...typography.body, color: colors.textSecondary, marginBottom: spacing.lg },
   cardTitle: { ...typography.h2, color: colors.text, marginBottom: 4 },
   cardBody: { ...typography.body, color: colors.textSecondary, marginBottom: spacing.md },
+  waking: { ...typography.caption, color: colors.textSecondary, textAlign: 'center', marginBottom: spacing.sm },
 });
