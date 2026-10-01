@@ -44,6 +44,13 @@ interface RequestOptions {
   skipAuth?: boolean;
 }
 
+// Render's free tier puts the server to sleep after inactivity; waking it up can take
+// 30-50+ seconds. Without a timeout, a request made while it's asleep can hang indefinitely —
+// React Native's fetch has no built-in limit — which leaves any "busy" UI state stuck forever
+// (buttons disabled, spinners spinning) with no error ever surfacing. 75s comfortably covers a
+// cold start while still failing, visibly, if something is actually wrong.
+const REQUEST_TIMEOUT_MS = 75000;
+
 export async function apiRequest<T>(path: string, options: RequestOptions = {}): Promise<T> {
   if (demoMode) return (await demoRequest(path, options.method || 'GET', options.body)) as T;
 
@@ -53,11 +60,27 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
     if (token) headers.Authorization = `Bearer ${token}`;
   }
   const base = await getBaseUrl();
-  const response = await fetch(`${base}${path}`, {
-    method: options.method || 'GET',
-    headers,
-    body: options.body ? JSON.stringify(options.body) : undefined,
-  });
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
+  let response: Response;
+  try {
+    response = await fetch(`${base}${path}`, {
+      method: options.method || 'GET',
+      headers,
+      body: options.body ? JSON.stringify(options.body) : undefined,
+      signal: controller.signal,
+    });
+  } catch (err: any) {
+    if (err?.name === 'AbortError') {
+      throw new ApiError("The server is taking a while to respond — it may be waking up after being idle. Please try again.", 0);
+    }
+    throw err;
+  } finally {
+    clearTimeout(timeout);
+  }
+
   const data = response.status === 204 ? null : await response.json().catch(() => null);
   if (!response.ok) {
     const message = (data && (data.error || data.message)) || `Request failed (${response.status})`;
