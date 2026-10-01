@@ -99,7 +99,7 @@ async function verifyEmail(req, res) {
  */
 async function me(req, res) {
   const { rows } = await query(
-    'SELECT id, email, email_verified, created_at FROM users WHERE id = $1',
+    'SELECT id, email, email_verified, is_admin, created_at FROM users WHERE id = $1',
     [req.userId]
   );
   if (rows.length === 0) {
