@@ -5,6 +5,44 @@ export interface User {
   id: string;
   email: string;
   emailVerified: boolean;
+  is_admin?: boolean;
+}
+
+export interface AdminAccount {
+  id: string;
+  email: string;
+  is_active: boolean;
+  is_admin: boolean;
+  email_verified: boolean;
+  created_at: string;
+  business_id: string | null;
+  business_name: string | null;
+  onboarding_complete: boolean | null;
+  charges_enabled: boolean | null;
+  payouts_enabled: boolean | null;
+  invoice_count: number;
+  total_paid: string;
+}
+
+export interface AdminTransaction {
+  id: string;
+  invoice_number: number;
+  status: string;
+  total: string;
+  amount_paid: string;
+  currency: string;
+  created_at: string;
+  paid_at: string | null;
+  client_name: string | null;
+  payments: {
+    id: string;
+    method: string;
+    amount: string;
+    status: string;
+    failure_reason: string | null;
+    refunded_amount: string;
+    created_at: string;
+  }[];
 }
 
 export interface Business {
@@ -219,4 +257,43 @@ export async function refundInvoice(invoiceId: string, amount?: number) {
 
 export async function getInvoicePdfUrl(invoiceId: string) {
   return `${await getBaseUrl()}/invoices/${invoiceId}/pdf`;
+}
+
+// ── Admin ──────────────────────────────────────────────────────────────
+// Owner-only tools: view every account, edit a business for support, deactivate.
+
+/** Claims the owner role for the current account. Only works once — refuses
+ *  if any admin already exists. */
+export async function bootstrapAdmin() {
+  return apiRequest<{ user: User }>('/admin/bootstrap', { method: 'POST' });
+}
+
+export async function listAdminAccounts(search?: string) {
+  const qs = search ? `?search=${encodeURIComponent(search)}` : '';
+  return apiRequest<{ accounts: AdminAccount[] }>(`/admin/accounts${qs}`);
+}
+
+export async function getAdminAccount(userId: string) {
+  return apiRequest<{
+    user: { id: string; email: string; is_active: boolean; is_admin: boolean; email_verified: boolean; created_at: string };
+    business: Business | null;
+    stripeAccount: { charges_enabled: boolean; payouts_enabled: boolean; onboarding_type: string } | null;
+    clientCount: number;
+  }>(`/admin/accounts/${userId}`);
+}
+
+export async function updateAdminAccountBusiness(userId: string, data: Partial<Business>) {
+  return apiRequest<{ business: Business }>(`/admin/accounts/${userId}/business`, { method: 'PATCH', body: data });
+}
+
+export async function deactivateAdminAccount(userId: string) {
+  return apiRequest<{ user: { id: string; email: string; is_active: boolean } }>(`/admin/accounts/${userId}/deactivate`, { method: 'POST' });
+}
+
+export async function reactivateAdminAccount(userId: string) {
+  return apiRequest<{ user: { id: string; email: string; is_active: boolean } }>(`/admin/accounts/${userId}/reactivate`, { method: 'POST' });
+}
+
+export async function getAdminAccountTransactions(userId: string) {
+  return apiRequest<{ invoices: AdminTransaction[] }>(`/admin/accounts/${userId}/transactions`);
 }
