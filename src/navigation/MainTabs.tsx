@@ -12,6 +12,8 @@ import ClientCreateScreen from '@/screens/clients/ClientCreateScreen';
 import SettingsScreen from '@/screens/settings/SettingsScreen';
 import BusinessEditScreen from '@/screens/settings/BusinessEditScreen';
 import StripeConnectScreen from '@/screens/onboarding/StripeConnectScreen';
+import AdminAccountsScreen from '@/screens/admin/AdminAccountsScreen';
+import AdminAccountDetailScreen from '@/screens/admin/AdminAccountDetailScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -45,6 +47,8 @@ export default function MainStack() {
       <Stack.Screen name="ClientCreate" component={ClientCreateScreen} options={{ title: 'New client' }} />
       <Stack.Screen name="BusinessEdit" component={BusinessEditScreen} options={{ title: 'Business info' }} />
       <Stack.Screen name="StripeConnect" component={StripeConnectScreen} options={{ title: 'Connect Stripe' }} />
+      <Stack.Screen name="AdminAccounts" component={AdminAccountsScreen} options={{ title: 'All accounts' }} />
+      <Stack.Screen name="AdminAccountDetail" component={AdminAccountDetailScreen} options={{ title: 'Account' }} />
     </Stack.Navigator>
   );
 }
