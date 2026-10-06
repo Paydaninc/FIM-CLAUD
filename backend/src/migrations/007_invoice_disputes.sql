@@ -1,3 +1,0 @@
-ALTER TABLE invoices
-  ADD COLUMN disputed BOOLEAN NOT NULL DEFAULT FALSE,
-  ADD COLUMN dispute_reason TEXT;
